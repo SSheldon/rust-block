@@ -59,7 +59,7 @@ use std::ptr;
 use libc::{c_int, c_ulong};
 
 use objc::runtime::{Class, Object};
-use objc::{Message, Id};
+use objc::{Encode, Encoding, Message, Id};
 
 #[link(name = "Foundation", kind = "framework")]
 extern {
@@ -127,6 +127,30 @@ impl<A: BlockArguments, R> Block<A, R> where A: BlockArguments {
 }
 
 unsafe impl<A, R> Message for Block<A, R> { }
+
+unsafe impl<'a, A, R> Encode for &'a Block<A, R> {
+    fn encode() -> Encoding { unsafe { Encoding::from_str("@?") } }
+}
+
+unsafe impl<'a, A, R> Encode for &'a mut Block<A, R> {
+    fn encode() -> Encoding { unsafe { Encoding::from_str("@?") } }
+}
+
+unsafe impl<'a, A, R> Encode for Option<&'a Block<A, R>> {
+    fn encode() -> Encoding { unsafe { Encoding::from_str("@?") } }
+}
+
+unsafe impl<'a, A, R> Encode for Option<&'a mut Block<A, R>> {
+    fn encode() -> Encoding { unsafe { Encoding::from_str("@?") } }
+}
+
+unsafe impl<A, R> Encode for *const Block<A, R> {
+    fn encode() -> Encoding { unsafe { Encoding::from_str("@?") } }
+}
+
+unsafe impl<A, R> Encode for *mut Block<A, R> {
+    fn encode() -> Encoding { unsafe { Encoding::from_str("@?") } }
+}
 
 /// Types that may be converted into a `ConcreteBlock`.
 pub trait IntoConcreteBlock<A> where A: BlockArguments {
