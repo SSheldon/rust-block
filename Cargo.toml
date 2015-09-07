@@ -15,6 +15,10 @@ exclude = [".gitignore"]
 [dependencies]
 libc = "0.1"
 
+[features]
+gnustep_runtime = []
+
 [dev-dependencies.objc_test_utils]
 version = "0.0"
 path = "test_utils"
+

@@ -56,7 +56,8 @@ use std::ops::{Deref, DerefMut};
 use std::ptr;
 use libc::{c_int, c_ulong, c_void};
 
-#[link(name = "System", kind = "dylib")]
+#[cfg_attr(not(feature = "gnustep_runtime"),link(name = "System", kind = "dylib"))]
+#[cfg_attr(feature ="gnustep_runtime",link(name = "objc", kind = "dylib"))]
 extern {
     static _NSConcreteStackBlock: ();
 
