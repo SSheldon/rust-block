@@ -56,7 +56,8 @@ use std::ptr;
 
 enum Class { }
 
-#[link(name = "System", kind = "dylib")]
+#[cfg_attr(not(feature = "gnustep_runtime"),link(name = "System", kind = "dylib"))]
+#[cfg_attr(feature ="gnustep_runtime",link(name = "objc", kind = "dylib"))]
 extern {
     static _NSConcreteStackBlock: Class;
 

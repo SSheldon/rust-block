@@ -12,6 +12,10 @@ license = "MIT"
 
 exclude = [".gitignore"]
 
+[features]
+gnustep_runtime = []
+
 [dev-dependencies.objc_test_utils]
 version = "0.0"
 path = "test_utils"
+

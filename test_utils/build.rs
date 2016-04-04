@@ -1,5 +1,5 @@
 extern crate gcc;
 
 fn main() {
-    gcc::compile_library("libblock_utils.a", &["block_utils.c"]);
+    gcc::Config::new().file("block_utils.c").flag("-fblocks").compile("libblock_utils.a");
 }
