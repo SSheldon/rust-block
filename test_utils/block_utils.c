@@ -1,7 +1,8 @@
 #include <stdint.h>
-#if __has_include("Block.h")
+
+#if __has_include(<Block.h>)
 #include <Block.h>
-#elif __has_include("objc/blocks_runtime.h")
+#elif __has_include(<objc/blocks_runtime.h>)
 #include <objc/blocks_runtime.h>
 #endif
 
