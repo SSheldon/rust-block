@@ -24,6 +24,7 @@ fn main() {
 #[cfg(not(any(target_os = "macos", target_os = "ios")))]
 fn has_library(library: &str) -> Result<(),String> {
     let invocation_result = gcc::Config::new()
+      .compiler("clang")
       .get_compiler().to_command()
       .arg(format!("-l{}", library))
       .args(&["-x", "c"])
