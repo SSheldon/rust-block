@@ -28,7 +28,7 @@ fn has_library(library: &str) -> Result<(),String> {
       .arg(format!("-l{}", library))
       .args(&["-x", "c"])
       .args(&["-o", "/dev/null"])
-      .arg(format!("-"))
+      .arg("-")
       .stdin(Stdio::piped())
       .stdout(Stdio::piped())
       .spawn();
@@ -51,12 +51,12 @@ fn has_library(library: &str) -> Result<(),String> {
 
 #[cfg(not(any(target_os = "macos", target_os = "ios")))]
 fn main() {
-    if has_library("BlocksRuntime").is_ok() {
-        println!("cargo:rustc-link-lib=BlocksRuntime")
-    } else if let Err(why) = has_library("objc") {
+    if has_library("objc").is_ok() {
+        println!("cargo:rustc-link-lib=objc")
+    } else if let Err(why) = has_library("BlocksRuntime") {
         panic!("Could not find blocks runtime library: {}", why)
     } else {
-        println!("cargo:rustc-link-lib=objc")
+        println!("cargo:rustc-link-lib=BlocksRuntime")
     }
 
 }
