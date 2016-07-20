@@ -45,21 +45,23 @@ to be copied once, and we can enforce this in Rust, but if Objective-C code
 were to copy it twice we could have a double free.
 */
 
-extern crate libc;
-
 #[cfg(test)]
-extern crate objc_test_utils;
+mod test_utils;
 
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::{Deref, DerefMut};
+use std::os::raw::{c_int, c_ulong, c_void};
 use std::ptr;
-use libc::{c_int, c_ulong, c_void};
 
-#[cfg_attr(not(feature = "gnustep_runtime"),link(name = "System", kind = "dylib"))]
-#[cfg_attr(feature ="gnustep_runtime",link(name = "objc", kind = "dylib"))]
+enum Class { }
+
+#[cfg_attr(any(target_os = "macos", target_os = "ios"),
+           link(name = "System", kind = "dylib"))]
+#[cfg_attr(not(any(target_os = "macos", target_os = "ios")),
+           link(name = "BlocksRuntime", kind = "dylib"))]
 extern {
-    static _NSConcreteStackBlock: ();
+    static _NSConcreteStackBlock: Class;
 
     fn _Block_copy(block: *const c_void) -> *mut c_void;
     fn _Block_release(block: *const c_void);
@@ -105,7 +107,7 @@ block_args_impl!(a: A, b: B, c: C, d: D, e: E, f: F, g: G, h: H, i: I, j: J, k: 
 
 #[repr(C)]
 struct BlockBase<A, R> {
-    isa: *const (),
+    isa: *const Class,
     flags: c_int,
     _reserved: c_int,
     invoke: unsafe extern fn(*mut Block<A, R>, ...) -> R,
@@ -206,9 +208,9 @@ macro_rules! concrete_block_impl {
                     (block.closure)($($a),*)
                 }
 
+                let f: unsafe extern fn(*mut ConcreteBlock<($($t,)*), R, X> $(, $a: $t)*) -> R = $f;
                 unsafe {
-                    ConcreteBlock::with_invoke(
-                        mem::transmute($f::<$($t,)* R, X>), self)
+                    ConcreteBlock::with_invoke(mem::transmute(f), self)
                 }
             }
         }
@@ -336,36 +338,8 @@ impl<B> BlockDescriptor<B> {
 
 #[cfg(test)]
 mod tests {
-    use objc_test_utils;
-    use super::{Block, ConcreteBlock, RcBlock};
-
-    fn get_int_block_with(i: i32) -> RcBlock<(), i32> {
-        unsafe {
-            let ptr = objc_test_utils::get_int_block_with(i);
-            RcBlock::new(ptr as *mut _)
-        }
-    }
-
-    fn get_add_block_with(i: i32) -> RcBlock<(i32,), i32> {
-        unsafe {
-            let ptr = objc_test_utils::get_add_block_with(i);
-            RcBlock::new(ptr as *mut _)
-        }
-    }
-
-    fn invoke_int_block(block: &Block<(), i32>) -> i32 {
-        let ptr = block as *const _;
-        unsafe {
-            objc_test_utils::invoke_int_block(ptr as *mut _)
-        }
-    }
-
-    fn invoke_add_block(block: &Block<(i32,), i32>, a: i32) -> i32 {
-        let ptr = block as *const _;
-        unsafe {
-            objc_test_utils::invoke_add_block(ptr as *mut _, a)
-        }
-    }
+    use test_utils::*;
+    use super::{ConcreteBlock, RcBlock};
 
     #[test]
     fn test_call_block() {
