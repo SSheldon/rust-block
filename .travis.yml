@@ -15,14 +15,14 @@ matrix:
       env: IOS_ARCHS="i386 x86_64 armv7 armv7s aarch64"
     - os: linux
       rust: stable
-      env: BLOCKS_RUNTIME=BlocksRuntime
+      env: IOS_ARCHS="" BLOCKS_RUNTIME=BlocksRuntime
       addons:
         apt:
           packages:
             - libblocksruntime-dev
     - os: linux
       rust: nightly
-      env: BLOCKS_RUNTIME=BlocksRuntime
+      env: IOS_ARCHS="" BLOCKS_RUNTIME=BlocksRuntime
       addons:
         apt:
           packages:
