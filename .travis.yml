@@ -6,17 +6,24 @@ os:
   - osx
   - linux
 env:
-  - IOS_ARCHS=""
+  - IOS_ARCHS="" BLOCKS_RUNTIME=ObjC
 matrix:
   include:
     - os: osx
       osx_image: xcode7.2
       rust: nightly
       env: IOS_ARCHS="i386 x86_64 armv7 armv7s aarch64"
+    - os: linux
+      env: BLOCKS_RUNTIME=BlocksRuntime
+      addons:
+        apt:
+          packages:
+            - libblocksruntime-dev
 sudo: false
 install: ./travis_install.sh
+before_script: >
+  if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$BLOCKS_RUNTIME" = "ObjC" ]; then
+    export LIBRARY_PATH=$HOME/libobjc2_staging/lib:$LIBRARY_PATH;
+    export LD_LIBRARY_PATH=$HOME/libobjc2_staging/lib:$LD_LIBRARY_PATH;
+  fi
 script: ./travis_test.sh
-addons:
-  apt:
-    packages:
-      - libblocksruntime-dev
