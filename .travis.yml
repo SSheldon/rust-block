@@ -14,6 +14,14 @@ matrix:
       rust: nightly
       env: IOS_ARCHS="i386 x86_64 armv7 armv7s aarch64"
     - os: linux
+      rust: stable
+      env: BLOCKS_RUNTIME=BlocksRuntime
+      addons:
+        apt:
+          packages:
+            - libblocksruntime-dev
+    - os: linux
+      rust: nightly
       env: BLOCKS_RUNTIME=BlocksRuntime
       addons:
         apt:
@@ -25,5 +33,6 @@ before_script: >
   if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$BLOCKS_RUNTIME" = "ObjC" ]; then
     export LIBRARY_PATH=$HOME/libobjc2_staging/lib:$LIBRARY_PATH;
     export LD_LIBRARY_PATH=$HOME/libobjc2_staging/lib:$LD_LIBRARY_PATH;
+    export CPATH=$HOME/libobjc2_staging/include:$CPATH;
   fi
 script: ./travis_test.sh
