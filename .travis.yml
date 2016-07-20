@@ -12,7 +12,7 @@ matrix:
     - os: osx
       osx_image: xcode7.2
       rust: nightly
-      env: IOS_ARCHS="i386 x86_64 armv7 armv7s aarch64"
+      env: IOS_ARCHS="i386 x86_64 armv7 armv7s aarch64" BLOCKS_RUNTIME=ObjC
     - os: linux
       rust: stable
       env: IOS_ARCHS="" BLOCKS_RUNTIME=BlocksRuntime
