@@ -28,6 +28,7 @@ fn has_library(library: &str) -> Result<(),String> {
       .arg(format!("-l{}", library))
       .args(&["-x", "c"])
       .args(&["-o", "/dev/null"])
+      .arg("-v")
       .arg("-")
       .stdin(Stdio::piped())
       .stdout(Stdio::piped())
