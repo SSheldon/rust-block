@@ -22,7 +22,7 @@ fn main() {
 }
 
 #[cfg(not(any(target_os = "macos", target_os = "ios")))]
-fn has_library(library: &str) -> Result<(),String> {
+fn check_block_copy_symbol_in_lib(library: &str) -> Result<(),String> {
     let invocation_result = gcc::Config::new()
       .compiler("clang")
       .get_compiler().to_command()
@@ -52,9 +52,9 @@ fn has_library(library: &str) -> Result<(),String> {
 
 #[cfg(not(any(target_os = "macos", target_os = "ios")))]
 fn main() {
-    if has_library("objc").is_ok() {
+    if check_block_copy_symbol_in_lib("objc").is_ok() {
         println!("cargo:rustc-link-lib=objc")
-    } else if let Err(why) = has_library("BlocksRuntime") {
+    } else if let Err(why) = check_block_copy_symbol_in_lib("BlocksRuntime") {
         panic!("Could not find blocks runtime library: {}", why)
     } else {
         println!("cargo:rustc-link-lib=BlocksRuntime")

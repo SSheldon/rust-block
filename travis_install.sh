@@ -28,6 +28,6 @@ if [ -n "$IOS_ARCHS" ]; then
     chmod +x rust-test-ios
 fi
 
-if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$BLOCKS_RUNTIME" = "ObjC" ]; then
+if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$BLOCKS_RUNTIME" = "ObjC-compatible" ]; then
     gnustep_install
 fi
