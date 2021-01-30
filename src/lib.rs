@@ -155,12 +155,20 @@ impl<A, R> RcBlock<A, R> {
         let ptr = _Block_copy(ptr as *const c_void) as *mut Block<A, R>;
         Self { ptr }
     }
+
+    pub fn as_ptr(&self) -> *const Block<A,R> {
+        self.ptr
+    }
+
+    pub fn as_mut_ptr(&mut self) -> *mut Block<A,R> {
+        self.ptr
+    }
 }
 
 impl<A, R> Clone for RcBlock<A, R> {
-    fn clone(&self) -> RcBlock<A, R> {
+    fn clone(&self) -> Self {
         unsafe {
-            RcBlock::copy(self.ptr)
+            Self::copy(self.ptr)
         }
     }
 }
@@ -168,7 +176,7 @@ impl<A, R> Clone for RcBlock<A, R> {
 impl<A, R> Deref for RcBlock<A, R> {
     type Target = Block<A, R>;
 
-    fn deref(&self) -> &Block<A, R> {
+    fn deref(&self) -> &Self::Target {
         unsafe { &*self.ptr }
     }
 }
@@ -327,7 +335,7 @@ struct BlockDescriptor<B> {
 
 impl<B> BlockDescriptor<B> {
     fn new() -> BlockDescriptor<B> {
-        BlockDescriptor {
+        Self {
             _reserved: 0,
             block_size: mem::size_of::<B>() as c_ulong,
             copy_helper: block_context_copy::<B>,
