@@ -145,7 +145,7 @@ impl<A, R> RcBlock<A, R> {
     /// reference count or it will be overreleased when the `RcBlock` is
     /// dropped.
     pub unsafe fn new(ptr: *mut Block<A, R>) -> Self {
-        RcBlock { ptr: ptr }
+        Self { ptr }
     }
 
     /// Constructs an `RcBlock` by copying the given block.
@@ -153,7 +153,7 @@ impl<A, R> RcBlock<A, R> {
     /// Unsafe because `ptr` must point to a valid `Block`.
     pub unsafe fn copy(ptr: *mut Block<A, R>) -> Self {
         let ptr = _Block_copy(ptr as *const c_void) as *mut Block<A, R>;
-        RcBlock { ptr: ptr }
+        Self { ptr }
     }
 }
 
@@ -256,7 +256,7 @@ impl<A, R, F> ConcreteBlock<A, R, F> {
     /// correct arguments.
     unsafe fn with_invoke(invoke: unsafe extern fn(*mut Self, ...) -> R,
             closure: F) -> Self {
-        ConcreteBlock {
+        Self {
             base: BlockBase {
                 isa: &_NSConcreteStackBlock,
                 // 1 << 25 = BLOCK_HAS_COPY_DISPOSE
@@ -288,7 +288,7 @@ impl<A, R, F> ConcreteBlock<A, R, F> where F: 'static {
 impl<A, R, F> Clone for ConcreteBlock<A, R, F> where F: Clone {
     fn clone(&self) -> Self {
         unsafe {
-            ConcreteBlock::with_invoke(mem::transmute(self.base.invoke),
+            Self::with_invoke(mem::transmute(self.base.invoke),
                 self.closure.clone())
         }
     }
