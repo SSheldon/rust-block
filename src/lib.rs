@@ -196,15 +196,15 @@ macro_rules! concrete_block_impl {
     );
     ($f:ident, $($a:ident : $t:ident),*) => (
         impl<$($t,)* R, X> IntoConcreteBlock<($($t,)*)> for X
-                where X: Fn($($t,)*) -> R {
+                where X: FnMut($($t,)*) -> R {
             type Ret = R;
 
             fn into_concrete_block(self) -> ConcreteBlock<($($t,)*), R, X> {
                 unsafe extern fn $f<$($t,)* R, X>(
                         block_ptr: *mut ConcreteBlock<($($t,)*), R, X>
                         $(, $a: $t)*) -> R
-                        where X: Fn($($t,)*) -> R {
-                    let block = &*block_ptr;
+                        where X: FnMut($($t,)*) -> R {
+                    let block = &mut *block_ptr;
                     (block.closure)($($a),*)
                 }
 
