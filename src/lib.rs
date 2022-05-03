@@ -273,15 +273,13 @@ impl<A, R, F> ConcreteBlock<A, R, F> {
 impl<A, R, F> ConcreteBlock<A, R, F> where F: 'static {
     /// Copy self onto the heap as an `RcBlock`.
     pub fn copy(self) -> RcBlock<A, R> {
-        unsafe {
             let mut block = self;
-            let copied = RcBlock::copy(&mut *block);
+            let copied = unsafe { RcBlock::copy(&mut *block) };
             // At this point, our copy helper has been run so the block will
             // be moved to the heap and we can forget the original block
             // because the heap block will drop in our dispose helper.
             mem::forget(block);
             copied
-        }
     }
 }
 
