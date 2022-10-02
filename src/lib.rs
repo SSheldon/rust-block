@@ -255,15 +255,16 @@ impl<A, R, F> ConcreteBlock<A, R, F> {
     /// correct arguments.
     unsafe fn with_invoke(invoke: unsafe extern fn(*mut Self, ...) -> R,
             closure: F) -> Self {
+        let descriptor = &BlockDescriptorImpl::<ConcreteBlock<A, R, F>>::DESCRIPTOR;
+        const BLOCK_HAS_COPY_DISPOSE: c_int = 1 << 25;
         ConcreteBlock {
             base: BlockBase {
                 isa: &_NSConcreteStackBlock,
-                // 1 << 25 = BLOCK_HAS_COPY_DISPOSE
-                flags: 1 << 25,
+                flags: if descriptor.dispose_helper.is_some() { BLOCK_HAS_COPY_DISPOSE } else { 0 },
                 _reserved: 0,
                 invoke: mem::transmute(invoke),
             },
-            descriptor: &BlockDescriptorImpl::<ConcreteBlock<A, R, F>>::DESCRIPTOR,
+            descriptor: descriptor,
             closure: closure,
         }
     }
@@ -320,8 +321,8 @@ unsafe extern fn block_context_copy(_dst: *mut c_void, _src: *const c_void) {
 struct BlockDescriptor {
     _reserved: c_ulong,
     block_size: c_ulong,
-    copy_helper: unsafe extern fn(*mut c_void, *const c_void),
-    dispose_helper: unsafe extern fn(*mut c_void),
+    copy_helper: Option<unsafe extern fn(*mut c_void, *const c_void)>,
+    dispose_helper: Option<unsafe extern fn(*mut c_void)>,
 }
 
 struct BlockDescriptorImpl<B>(PhantomData<B>);
@@ -330,8 +331,8 @@ impl<B> BlockDescriptorImpl<B> {
     const DESCRIPTOR: BlockDescriptor = BlockDescriptor {
         _reserved: 0,
         block_size: mem::size_of::<B>() as c_ulong,
-        copy_helper: block_context_copy,
-        dispose_helper: block_context_dispose::<B>,
+        copy_helper: if std::mem::needs_drop::<B>() { Some(block_context_copy) } else { None },
+        dispose_helper: if std::mem::needs_drop::<B>() { Some(block_context_dispose::<B>) } else { None },
     };
 }
 
