@@ -52,7 +52,6 @@ use std::marker::PhantomData;
 use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::os::raw::{c_int, c_ulong, c_void};
-use std::ptr;
 
 enum Class { }
 
@@ -236,7 +235,7 @@ concrete_block_impl!(concrete_block_invoke_args12, a: A, b: B, c: C, d: D, e: E,
 #[repr(C)]
 pub struct ConcreteBlock<A, R, F> {
     base: BlockBase<A, R>,
-    descriptor: Box<BlockDescriptor<ConcreteBlock<A, R, F>>>,
+    descriptor: &'static BlockDescriptor,
     closure: F,
 }
 
@@ -264,7 +263,7 @@ impl<A, R, F> ConcreteBlock<A, R, F> {
                 _reserved: 0,
                 invoke: mem::transmute(invoke),
             },
-            descriptor: Box::new(BlockDescriptor::new()),
+            descriptor: &BlockDescriptorImpl::<ConcreteBlock<A, R, F>>::DESCRIPTOR,
             closure: closure,
         }
     }
@@ -308,32 +307,32 @@ impl<A, R, F> DerefMut for ConcreteBlock<A, R, F> {
     }
 }
 
-unsafe extern fn block_context_dispose<B>(block: &mut B) {
+unsafe extern fn block_context_dispose<B>(block: *mut c_void) {
     // Read the block onto the stack and let it drop
-    ptr::read(block);
+    block.cast::<B>().read();
 }
 
-unsafe extern fn block_context_copy<B>(_dst: &mut B, _src: &B) {
+unsafe extern fn block_context_copy(_dst: *mut c_void, _src: *const c_void) {
     // The runtime memmoves the src block into the dst block, nothing to do
 }
 
 #[repr(C)]
-struct BlockDescriptor<B> {
+struct BlockDescriptor {
     _reserved: c_ulong,
     block_size: c_ulong,
-    copy_helper: unsafe extern fn(&mut B, &B),
-    dispose_helper: unsafe extern fn(&mut B),
+    copy_helper: unsafe extern fn(*mut c_void, *const c_void),
+    dispose_helper: unsafe extern fn(*mut c_void),
 }
 
-impl<B> BlockDescriptor<B> {
-    fn new() -> BlockDescriptor<B> {
-        BlockDescriptor {
-            _reserved: 0,
-            block_size: mem::size_of::<B>() as c_ulong,
-            copy_helper: block_context_copy::<B>,
-            dispose_helper: block_context_dispose::<B>,
-        }
-    }
+struct BlockDescriptorImpl<B>(PhantomData<B>);
+
+impl<B> BlockDescriptorImpl<B> {
+    const DESCRIPTOR: BlockDescriptor = BlockDescriptor {
+        _reserved: 0,
+        block_size: mem::size_of::<B>() as c_ulong,
+        copy_helper: block_context_copy,
+        dispose_helper: block_context_dispose::<B>,
+    };
 }
 
 #[cfg(test)]
