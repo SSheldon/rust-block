@@ -6,8 +6,8 @@ authors = ["Steven Sheldon"]
 description = "Rust interface for Apple's C language extension of blocks."
 keywords = ["blocks", "osx", "ios", "objective-c"]
 readme = "README.md"
-repository = "http://github.com/SSheldon/rust-block"
-documentation = "http://ssheldon.github.io/rust-objc/block/"
+repository = "https://github.com/SSheldon/rust-block"
+documentation = "https://ssheldon.github.io/rust-objc/block/"
 license = "MIT"
 
 exclude = [
